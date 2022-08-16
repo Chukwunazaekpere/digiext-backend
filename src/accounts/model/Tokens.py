@@ -2,7 +2,8 @@ from datetime import datetime
 import hashlib
 import logging
 import secrets
-from config import database_connection
+import config 
+database_connection = config.database_connection
 from . import UsersAccount
 import os
 
