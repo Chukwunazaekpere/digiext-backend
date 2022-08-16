@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 from re import template
 from xml.dom import ValidationErr
-from config.db_config import (
+from src.config.db_config import (
     database_connection
 )
 import hashlib
