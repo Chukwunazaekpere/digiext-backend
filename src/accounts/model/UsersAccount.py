@@ -1,15 +1,12 @@
 from datetime import datetime
 import os
-from re import template
-from xml.dom import ValidationErr
 from src.config.db_config import (
     database_connection
 )
-import hashlib
 from flask_mail import Message
 from flask import render_template, render_template_string
 from . import Tokens 
-
+from src.server import send_mail
 
 class UsersAccount(object):
     users = database_connection()["users"]
@@ -99,7 +96,7 @@ class UsersAccount(object):
                     recipients=[receipients_email],
                     html=render_template(template_name_or_list="otp.html", **context)
                 )
-                server.send_mail.send(email_message)
+                send_mail.send(email_message)
                 return {
                     "status": True,
                     "message": f"Registration email has been successfully sent."
