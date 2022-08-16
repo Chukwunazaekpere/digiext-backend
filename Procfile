@@ -1,1 +1,1 @@
-web: gunicorn src.run.wsgi:digiext_server --timeout 120 --log-file -
+web: gunicorn src.wsgi:digiext_server --timeout 120 --log-file -
