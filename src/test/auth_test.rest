@@ -1,0 +1,20 @@
+POST http://localhost:8000/digiext-api/v1/users/register
+Content-Type: application/json
+
+{
+    "firstname": "Selenium",
+    "lastname": "Rhenium",
+    "email": "emmanuelchinaza5777@gmail.com",
+    "phone": "08169547035",
+    "password": "12345678",
+    "confirm_password": "12345678"
+}
+
+###
+PUT http://localhost:8000/digiext-api/v1/users/verify-otp
+Content-Type: application/json
+
+{
+    "email": "emmanuelchinaza5777@gmail.com",
+    "otp": ['2', 'f', '7', '9']
+}
