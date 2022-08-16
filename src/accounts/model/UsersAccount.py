@@ -9,7 +9,6 @@ import hashlib
 from flask_mail import Message
 from flask import render_template, render_template_string
 from . import Tokens 
-import server
 
 
 class UsersAccount(object):
