@@ -103,11 +103,12 @@ class UsersAccountController(Resource):
                 print("\n\t users_details: ", users_details)
                 if otp_exists:
                     AuthToken.delete_token(stringified_otp)
-                    login_token = AuthToken.generate_token(token_length=60, users_id=otp_exists["_id"], token_purpose="login")
+                    login_token = AuthToken().generate_token(token_length=60, users_id=users_details["_id"], token_purpose="Login")
                     success_data = {
                         "status": True,
                         "login_token": login_token,
-                        "status_code": 201
+                        "status_code": 201,
+                        "message": "Verification was successful"
                     }
                     print("\n\t Success: ", success_data)
                     return success_data
@@ -117,7 +118,7 @@ class UsersAccountController(Resource):
             error_data = {
                 "status": False,
                 "message": str(verify_token_error),
-                "status_code": 400
+                "status_code": 400,
             }
             return error_data
 

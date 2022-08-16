@@ -30,7 +30,7 @@ class Tokens(object):
             })
             print("\n\t required_token: ", required_token)
 
-            if token_purpose == "Login":
+            if token_purpose.lower() == "login":
                 required_token = hashed_token
             return required_token
         except Exception as generate_token_error:
