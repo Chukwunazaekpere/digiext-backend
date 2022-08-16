@@ -96,7 +96,7 @@ class UsersAccount(object):
                     recipients=[receipients_email],
                     html=render_template(template_name_or_list="otp.html", **context)
                 )
-                send_mail.send(email_message)
+                server.send_mail.send(email_message)
                 return {
                     "status": True,
                     "message": f"Registration email has been successfully sent."
