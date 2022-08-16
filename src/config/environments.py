@@ -25,16 +25,14 @@ class BaseConfig(object):
 
 class DevEnvVariables(BaseConfig):
     print("\n\t LOCAL_DB_URL: ", os.getenv("LOCAL_DB_URL"))
-    def load_env_variables():
-        os.environ["DB_URL"] = os.getenv("LOCAL_DB_URL")
-        os.environ["DEBUG"] = "True"
+    os.environ["DB_URL"] = os.getenv("LOCAL_DB_URL")
+    os.environ["DEBUG"] = "True"
 
 
 
 class ProdEnvVariables(BaseConfig):
-    def load_env_variables():
-        os.environ["DB_URL"] = os.getenv("PROD_DB_URL")
-        os.environ["DEBUG"] = "False"
+    os.environ["DB_URL"] = os.getenv("PROD_DB_URL")
+    os.environ["DEBUG"] = "False"
 
 
     
