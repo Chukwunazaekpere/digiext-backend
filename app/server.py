@@ -5,7 +5,7 @@ from src.config import (
 )
 from flask import Flask
 from flask_restful import Api
-from accounts.controllers.AuthController import (
+from src.accounts.controllers.AuthController import (
     UsersAccountController,
     auth_routes
 )
