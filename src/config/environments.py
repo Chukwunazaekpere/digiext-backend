@@ -10,6 +10,7 @@ print("\m\t ENV: ",  os.path.join(os.path.dirname( __file__), ".env"))
 class BaseConfig(object):
     os.environ["FLASK_ENV"] = os.getenv("FLASK_ENV")
     print("\n\t FLASK_ENV: ", os.getenv("FLASK_ENV"))
+    PORT = os.getenv("PORT")
     os.environ["BASE_API"] = os.getenv("BASE_API")
     os.environ["PORT"] = os.getenv("PORT")
 
@@ -24,14 +25,16 @@ class BaseConfig(object):
 
 class DevEnvVariables(BaseConfig):
     print("\n\t LOCAL_DB_URL: ", os.getenv("LOCAL_DB_URL"))
-    os.environ["DB_URL"] = os.getenv("LOCAL_DB_URL")
-    os.environ["DEBUG"] = "True"
+    def load_env_variables():
+        os.environ["DB_URL"] = os.getenv("LOCAL_DB_URL")
+        os.environ["DEBUG"] = "True"
 
 
 
 class ProdEnvVariables(BaseConfig):
-    os.environ["DB_URL"] = os.getenv("PROD_DB_URL")
-    os.environ["DEBUG"] = "False"
+    def load_env_variables():
+        os.environ["DB_URL"] = os.getenv("PROD_DB_URL")
+        os.environ["DEBUG"] = "False"
 
 
     
