@@ -1,5 +1,5 @@
 import os
-from config import (
+from src.config import (
     DevEnvVariables,
     ProdEnvVariables
 )
