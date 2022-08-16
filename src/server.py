@@ -1,8 +1,12 @@
 import os
-from config import (
-    DevEnvVariables,
-    ProdEnvVariables
-)
+import config.environments
+# from .config.environments import (
+#     DevEnvVariables,
+#     ProdEnvVariables
+# )
+DevEnvVariables = config.environments.DevEnvVariables
+
+ProdEnvVariables = config.environments.ProdEnvVariables
 from flask import Flask
 from flask_restful import Api
 from accounts.controllers.AuthController import (
