@@ -1,1 +1,1 @@
-web: gunicorn src.run.wsgi --timeout 120 --log-file -
+web: python src.run.wsgi.py --timeout 120 --log-file -
