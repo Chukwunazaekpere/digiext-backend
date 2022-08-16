@@ -1,11 +1,11 @@
 import os
-from config.environments import (
+from ..config.environments import (
     DevEnvVariables,
     ProdEnvVariables
 )
 from flask import Flask
 from flask_restful import Api
-from accounts.controllers.AuthController import (
+from ..accounts.controllers.AuthController import (
     UsersAccountController,
     auth_routes
 )
