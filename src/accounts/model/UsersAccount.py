@@ -6,7 +6,7 @@ from src.config.db_config import (
 from flask_mail import Message
 from flask import render_template, render_template_string
 from . import Tokens 
-from src.server import send_mail
+from src import server
 
 class UsersAccount(object):
     users = database_connection()["users"]
