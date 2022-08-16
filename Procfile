@@ -1,1 +1,1 @@
-web: gunicorn digiext_backend.wsgi --timeout 120 --log-file -
+web: gunicorn app.wsgi --timeout 120 --log-file -
