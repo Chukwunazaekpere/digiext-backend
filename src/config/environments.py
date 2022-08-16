@@ -13,7 +13,6 @@ class BaseConfig(object):
     PORT = os.getenv("PORT")
     os.environ["BASE_API"] = os.getenv("BASE_API")
     os.environ['APP_SECRET'] = os.getenv("APP_SECRET")
-    os.environ['APP_SALT'] = os.getenv("APP_SALT")
     os.environ['MAIL_PORT'] = os.getenv("MAIL_PORT")
     os.environ['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
     os.environ['MAIL_USERNAME'] = os.getenv("ADMIN_EMAIL")
