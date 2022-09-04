@@ -9,13 +9,17 @@ from src.accounts.controllers.AuthController import (
     UsersAccountController,
     auth_routes
 )
+from src.utilities.controllers import (
+    UtilitiesControllers,
+    utilities_routes
+)
 import logging
 from flask_mail import Mail, Message
 
 
 BASE_API = os.getenv("BASE_API")
 FLASK_ENV = os.getenv("FLASK_ENV")
-print("\n\t FLASK_ENV: ", FLASK_ENV)
+print("\n\t FLASK_ENV-server: ", FLASK_ENV)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,7 +28,7 @@ digiext_api = Api(digiext_server)
 
 if FLASK_ENV == "development":
     DevEnvVariables()
-elif FLASK_ENV == "production":
+else:
     ProdEnvVariables()
 
 digiext_server.config['MAIL_PORT'] = os.getenv("MAIL_PORT")
@@ -38,3 +42,4 @@ digiext_server.config['MAIL_USE_SSL'] = True
 
 send_mail = Mail(digiext_server)
 digiext_api.add_resource(UsersAccountController, *auth_routes)
+digiext_api.add_resource(UtilitiesControllers, *utilities_routes)

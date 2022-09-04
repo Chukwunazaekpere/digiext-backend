@@ -24,15 +24,20 @@ class BaseConfig(object):
 
 
 class DevEnvVariables(BaseConfig):
-    print("\n\t LOCAL_DB_URL: ", os.getenv("LOCAL_DB_URL"))
-    os.environ["DB_URL"] = os.getenv("LOCAL_DB_URL")
-    os.environ["DEBUG"] = "True"
+    def __init__(self) -> None:
+        # super().__init__()
+        print("\n\t LOCAL_DB_URL: ", os.getenv("LOCAL_DB_URL"))
+        os.environ["DB_URL"] = os.getenv("LOCAL_DB_URL")
+        os.environ["DEBUG"] = "True"
 
 
 
 class ProdEnvVariables(BaseConfig):
-    os.environ["DB_URL"] = os.getenv("PROD_DB_URL")
-    os.environ["DEBUG"] = "False"
+    def __init__(self) -> None:
+        print("\n\t PROD_DB_URL: ", os.getenv("PROD_DB_URL"))
+        os.environ["DB_URL"] = os.getenv("PROD_DB_URL")
+        os.environ["DEBUG"] = "False"
+        # super().__init__()
 
 
     
