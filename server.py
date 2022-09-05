@@ -1,4 +1,8 @@
 import os
+from src.paper_industry.controllers import (
+    PaperIndustryControllers,
+    paper_industry_routes
+)
 from src.config.environments import (
     DevEnvVariables,
     ProdEnvVariables
@@ -43,3 +47,5 @@ digiext_server.config['MAIL_USE_SSL'] = True
 send_mail = Mail(digiext_server)
 digiext_api.add_resource(UsersAccountController, *auth_routes)
 digiext_api.add_resource(UtilitiesControllers, *utilities_routes)
+digiext_api.add_resource(PaperIndustryControllers, *paper_industry_routes)
+
