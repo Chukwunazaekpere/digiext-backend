@@ -126,6 +126,11 @@ class UsersAccountController(Resource):
 
     def verify_auth_token(self, cleaned_request):
         try:
+            all_users = self.Users.find()
+            print("\n\t All users: ", all_users)
+            for user in all_users:
+                print("\n\t user: ", user)
+
             print("\n\t verify_auth_token: ", cleaned_request)
             otp_code = cleaned_request['otp']
             otp_email = cleaned_request['email']
