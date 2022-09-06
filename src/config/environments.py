@@ -1,4 +1,3 @@
-from pickle import TRUE
 from dotenv import load_dotenv
 import os
 
@@ -13,6 +12,7 @@ class BaseConfig(object):
     PORT = os.getenv("PORT")
     os.environ["BASE_API"] = os.getenv("BASE_API")
     os.environ["PORT"] = os.getenv("PORT")
+    os.environ["DB_NAME"] = os.getenv("DB_NAME")
 
     os.environ['APP_SECRET'] = os.getenv("APP_SECRET")
     os.environ['MAIL_PORT'] = os.getenv("MAIL_PORT")

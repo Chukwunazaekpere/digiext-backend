@@ -62,8 +62,8 @@ class UsersAccountController(Resource):
         logging.info("\n\t Registering a user...")
         Users = UsersAccount()
         OTPToken = Tokens.Tokens()
-        print("\n\t All users: ", Users.users.find({}))
-        all_users = Users.users.find({})
+        # print("\n\t All users: ", Users.)
+        # all_users = Users.users.find({})
         # for user in all_users:
         #     print("\n\t user: ", user, user["_id"])
         #     del_stat = Users.find_by_id_and_delete(user['_id'])
