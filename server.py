@@ -15,8 +15,10 @@ from src.accounts.controllers.AuthController import (
 )
 from src.utilities.controllers import (
     UtilitiesControllers,
-    utilities_routes
+    utilities_routes,
 )
+from src.utilities.auto_initialisation import register_default_user
+
 import logging
 from flask_mail import Mail, Message
 
@@ -45,6 +47,7 @@ digiext_server.config['MAIL_USE_SSL'] = True
 
 
 send_mail = Mail(digiext_server)
+register_default_user()
 digiext_api.add_resource(UsersAccountController, *auth_routes)
 digiext_api.add_resource(UtilitiesControllers, *utilities_routes)
 digiext_api.add_resource(PaperIndustryControllers, *paper_industry_routes)

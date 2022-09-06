@@ -3,8 +3,8 @@ from ..model import (
 )
 
 
+Users = UsersAccount.Users
 class RegisterSerializer(object):
-    Users = UsersAccount.UsersAccount().users
     def __init__(self, firstname: str, lastname: str, email: str, phone: str, password: str, confirm_password: str) -> None:
         self.firstname = firstname
         self.lastname = lastname
@@ -15,21 +15,21 @@ class RegisterSerializer(object):
 
     def validate_data_existence(self, **kwargs):
         try:
-            user_by_email = self.Users.find_one({"email": self.email})
+            user_by_email = Users.find_one({"email": self.email})
             print("\n\t user_by_email: ", user_by_email)
             if user_by_email:
                 return {
                     "status": False,
                     "message": "A user with this email already exists"
                 }
-            phone = self.Users.find_one({"phone": self.phone})
+            phone = Users.find_one({"phone": self.phone})
             print("\n\t phone: ", phone)
             if phone:
                 return {
                     "status": False,
                     "message": "A user with this phone number already exists"
                 }
-            user_by_name = self.Users.find_one({
+            user_by_name = Users.find_one({
                 "firstname": self.firstname,
                 "lastname": self.lastname
             })

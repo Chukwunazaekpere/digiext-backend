@@ -3,15 +3,14 @@ from src.config.db_config import (
 )
 import datetime
 
-pickup_companies = database_connection()['pickup_companies']
+PickupCompanies = database_connection()['pickup_companies']
+PickupCompanyOwner = database_connection()['pickup_company_owner']
 class PaperIndustry(object):
-    pickup_company_boss = database_connection()['pickup_company_boss']
-
     @staticmethod
-    def create_company(company_name, company_address, companys_boss_id, company_primary_email, company_primary_phone, **other_company_details):
-        pickup_companies.insert_one({
+    def create_company(company_name, company_address, companys_owner_id, company_primary_email, company_primary_phone, **other_company_details):
+        PickupCompanies.insert_one({
             "company_name": company_name,
-            "companys_boss_id": companys_boss_id,
+            "companys_owner_id": companys_owner_id,
             "company_address": company_address,
             "company_primary_email": company_primary_email.lower(),
             "company_primary_phone": company_primary_phone,
@@ -20,12 +19,15 @@ class PaperIndustry(object):
             **other_company_details
         })
 
-    def create_companys_boss(self, companys_boss_firstname: str, companys_boss_lastname: str, companys_boss_email: str, companys_boss_phone: str):
-        new_companys_boss = self.pickup_company_boss.insert_one({
-            "companys_boss_firstname": companys_boss_firstname,
-            "companys_boss_lastname": companys_boss_lastname,
-            "companys_boss_email": companys_boss_email.lower(),
-            "companys_boss_phone": companys_boss_phone,
+    @staticmethod
+    def create_companys_owner(companys_owner_firstname: str, companys_owner_lastname: str, companys_owner_email: str, companys_owner_phone: str, users_id):
+        new_companys_owner = PickupCompanyOwner.insert_one({
+            "companys_owner_firstname": companys_owner_firstname,
+            "companys_owner_lastname": companys_owner_lastname,
+            "companys_owner_email": companys_owner_email.lower(),
+            "companys_owner_phone": companys_owner_phone,
+            "users_id": users_id,
             "date_registered": datetime.datetime.now(),
         })
-        return new_companys_boss._id
+        print("\n\t new_companys_owner-create: ", new_companys_owner.inserted_id)
+        return new_companys_owner.inserted_id

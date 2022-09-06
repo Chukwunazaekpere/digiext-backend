@@ -10,16 +10,16 @@ import server
 # from src import server
 
 
+Users = database_connection()["users"]
 class UsersAccount(object):
-    users = database_connection()["users"]
     def get_fullname(self, users_id_or_email):
         try:
-            user_by_id = self.users.find_one({"": users_id_or_email})
+            user_by_id = Users.find_one({"": users_id_or_email})
             if user_by_id:
                 users_fullname = f"{user_by_id['firstname']} {user_by_id['lastname']}"
                 return users_fullname
             else:
-                user_by_email = self.users.find_one({"email": users_id_or_email})
+                user_by_email = Users.find_one({"email": users_id_or_email})
                 users_fullname = f"{user_by_email['firstname']} {user_by_email['lastname']}"
                 return users_fullname
         except Exception as get_fullname_error:
@@ -40,9 +40,8 @@ class UsersAccount(object):
 
     @staticmethod
     def create(firstname, lastname, email, phone, password):
-        users = database_connection()["users"]
         try:
-            new_user = users.insert_one({
+            new_user = Users.insert_one({
                 "firstname": firstname,
                 "lastname": lastname,
                 "email": email,
@@ -82,7 +81,7 @@ class UsersAccount(object):
                 otp_code = tokens.generate_token(
                     token_length= 4,
                     token_purpose= "Registration",
-                    users_id=receipient_details['_id']
+                    users_id=receipient_details['_id'],
                 )
                 print("\n\t receipient_details: ", receipient_details)
                 context={

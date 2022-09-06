@@ -1,12 +1,10 @@
+from datetime import datetime
 import json
 import logging
 from xml.dom import ValidationErr
 from flask_restful import Resource, request
 import os
-
-import secrets
-secrets.token_hex()
-
+from src.utilities.authenticate import authenticate_requests
 from ..model import Tokens
 from ..serializers.auth_serializers import (
     RegisterSerializer
@@ -14,12 +12,51 @@ from ..serializers.auth_serializers import (
 from ..model.UsersAccount import (
     UsersAccount,
 ) 
+from ..model.UsersAccount import Users
+from src.utilities.models import UtilityModels, UserLogs
+
 BASE_API = os.getenv("BASE_API")
+BASE_API = f"{BASE_API}/users"
 
 class UsersAccountController(Resource):
     logging.basicConfig(level=logging.INFO)
     def login(self, cleaned_request):
-        print(cleaned_request)
+        try:
+            print("\n\t Login: ", cleaned_request)
+            password = cleaned_request['password']
+            email = cleaned_request['email']
+            user_exists = Users.find_one({"email": email})
+            error_message = "User does not exist."
+            if user_exists:
+                print("\n\t user_exists: ", user_exists)
+                existing_password = user_exists['password']
+                password_is_same = Tokens.Tokens.compare_token(hashed_password=existing_password, raw_token=password)
+                error_message = "Unrecognised credentials."
+                if password_is_same:
+                    login_token = Tokens.Tokens()
+                    users_id = user_exists["_id"]
+                    auth_token = login_token.generate_token(
+                        token_length=60, 
+                        users_id=users_id, 
+                        token_purpose="Login-Token", 
+                    )
+                    token_and_id = f"{auth_token}:{users_id}"
+                    return {
+                        "data": token_and_id,
+                        "status_code": 200,
+                        "status": True,
+                        "message": "Login successfull",
+                    }
+            raise ValidationErr(error_message)
+        except Exception as login_error:
+            print("\n\t login_error: ", login_error)
+            return {
+                "message": str(login_error),
+                "status_code": 400,
+                "status": False,
+                "data": None
+            }
+
 
     def sign_up(elf, cleaned_request):
         logging.info("\n\t Registering a user...")
@@ -74,7 +111,9 @@ class UsersAccountController(Resource):
             cleaned_request = json.loads(request.data)
             print("\n\t cleaned_request: ", cleaned_request)
             if "login" in url:
-                self.login(cleaned_request)
+                post_response = self.login(cleaned_request)
+                response_data = {"data": post_response['data'], "status": post_response['status'], "message": post_response['message']}
+                return response_data, post_response['status_code']
             elif 'register' in str(url):
                 logging.info("\n\t Registering a user...")
                 post_response = self.sign_up(cleaned_request)
@@ -131,11 +170,81 @@ class UsersAccountController(Resource):
             verify_response = self.verify_auth_token(cleaned_request)
             response_data = {"status": verify_response['status'], "message": verify_response['message']}
             return response_data, verify_response['status_code']
+        elif "authenticate" in url:
+            authenticate_response = self.authenticate_user(cleaned_request=cleaned_request)
+            print("\n\t authenticate_response: ", authenticate_response)
+            return authenticate_response, authenticate_response['status_code']
 
 
+    def get_profile_details(self, users_id):
+        user = Users.find_one({"_id": users_id})
+        if user:
+            return {
+                "data": user
+            }
+        return None
+    
+
+    def authenticate_user(self, cleaned_request):
+        try:
+            # print("\n\t cleaned_request: ", cleaned_request)
+            users_id = cleaned_request["id"]
+            auth_token = cleaned_request["token"]
+            found_token = authenticate_requests(token=f"{auth_token}:{users_id}")
+            error_message = "Token life has been exceeded."
+            if found_token['status']:
+                user = found_token["user"]
+                # print("\n\t user: ", user)
+                saved_users_id = user["_id"]
+                error_message = "Token comparison failed"
+                if users_id == str(saved_users_id):
+                    new_log = UserLogs.insert_one({
+                        "action": "Opened App", 
+                        "users_id": saved_users_id,
+                        "date_created": datetime.now()
+                    })
+                    # print("\n\t new Log: ", new_log)
+                    return {
+                        # "data": None,
+                        "status": True,
+                        "status_code": 200
+                    }
+            raise ValidationErr(error_message)
+        except Exception as authenticate_user_exception:
+            print(authenticate_user_exception)
+            return {
+                # "data": None,
+                "status": False,
+                "status_code": 403,
+                "message": str(authenticate_user_exception)
+            }
+
+    
+    def get(self, users_id):
+        try:
+            url = request.url
+            print("\n\t url: ", url)
+            # users_id = request.args.get("users_id")
+            print("\n\t args: ", request.args.get("users_id"))
+            print("\n\t users_id: ", users_id)
+            if "profiles" in url:
+                profile_response = self.get_profile_details(users_id=users_id)
+            elif "authenticate" in url:
+                authenticate_response = self.authenticate_user(token=users_id)
+                print("\n\t authenticate_response: ", authenticate_response)
+                return authenticate_response, authenticate_response['status_code']
+        except Exception as error:
+            print("\n\t error: ", error)
+
+        
+
+        
 
 auth_routes = [
-    f"{BASE_API}/users/login", 
-    f"{BASE_API}/users/register",
-    f"{BASE_API}/users/verify-otp",
+    f"{BASE_API}/login", 
+    f"{BASE_API}/register",
+    f"{BASE_API}/verify-otp",
+    f"{BASE_API}/profiles/<users_id>",
+    f"{BASE_API}/authenticate-user/<users_id>",
+    f"{BASE_API}/authenticate-user",
 ]

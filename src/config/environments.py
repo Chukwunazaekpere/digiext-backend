@@ -19,6 +19,13 @@ class BaseConfig(object):
     os.environ['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
     os.environ['MAIL_USERNAME'] = os.getenv("ADMIN_EMAIL")
     os.environ['MAIL_PASSWORD'] = os.getenv("DIGIEXT_APP_PASSWORD")
+    
+    os.environ['CONFIG_EMAIL'] = os.getenv("CONFIG_EMAIL")
+    os.environ['CONFIG_PHONE'] = os.getenv("CONFIG_PHONE")
+    os.environ['CONFIG_FIRSTNAME'] = os.getenv("CONFIG_FIRSTNAME")
+    os.environ['CONFIG_LASTNAME'] = os.getenv("CONFIG_LASTNAME")
+    os.environ['CONFIG_PASSWORD'] = os.getenv("CONFIG_PASSWORD")
+
 
 
 

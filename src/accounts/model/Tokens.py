@@ -6,20 +6,24 @@ from src.config.db_config import database_connection
 # database_connection = config.db_config.database_connection
 from . import UsersAccount
 import os
+from flask import Flask
+
+from flask_bcrypt import Bcrypt
+bcrypt = Bcrypt(Flask(__name__))
 
 APP_SECRET = os.getenv("APP_SECRET") 
 
+
+Users = UsersAccount.Users
+tokens = database_connection()['tokens']
 class Tokens(object):
     tokens = database_connection()['tokens']
-    Users = UsersAccount.UsersAccount().users
-
     """
     This method generates a given token of the stated length and saves the token
     """
     def generate_token(self, token_length: int, users_id: str, token_purpose: str):
         logging.info("Generating token")
         try:
-            tokens = database_connection()['tokens']
             required_token = secrets.token_hex(token_length)[0: token_length]
             hashed_token = self.hash_token(raw_token=required_token)
             print("\n\t hashed_token: ", hashed_token)
@@ -31,7 +35,8 @@ class Tokens(object):
             })
             print("\n\t required_token: ", required_token)
 
-            if token_purpose.lower() == "login":
+            if "login" in token_purpose.lower():
+                print("\n\t contains login: ", hashed_token)
                 required_token = hashed_token
             return required_token
         except Exception as generate_token_error:
@@ -40,7 +45,6 @@ class Tokens(object):
     
     @staticmethod
     def find_one(token: str):
-        tokens = database_connection()['tokens']
         token_exists = tokens.find_one({"token": token})
         if token_exists:
             return token_exists
@@ -50,7 +54,6 @@ class Tokens(object):
     @staticmethod
     def delete_token(token: str):
         try:
-            tokens = database_connection()['tokens']
             tokens.delete_one({"token": token})
             return True
         except Exception as token_deletion_error:
@@ -62,15 +65,28 @@ class Tokens(object):
         logging.basicConfig(level=logging.INFO)
         logging.info("Hashing token")
         try:
-            print("\n\t APP_SECRET: ", APP_SECRET)
             print("\n\t raw_token: ", raw_token)
-            hash_sequence = hashlib.sha512()
-            hash_sequence.update(("%s%s" % (APP_SECRET, raw_token)).encode("UTF-8"))
-            hashed_token = hash_sequence.hexdigest()
+            # hash_sequence = hashlib.sha512()
+            # hash_sequence.update(("%s%s" % (APP_SECRET, raw_token)).encode("UTF-8"))
+            # hashed_token = hash_sequence.hexdigest()
+            hashed_token = bcrypt.generate_password_hash(password=raw_token)
             print("\n\t hashed_token: ", hashed_token)
             return hashed_token
         except Exception as hash_error:
             print("\n\t hash_error: ", hash_error)
+            return None
+
+    @staticmethod
+    def compare_token(hashed_password, raw_token):
+        logging.basicConfig(level=logging.INFO)
+        logging.info("Comparing token")
+        try:
+            print("\n\t raw_token: ", raw_token)
+            password_compare = bcrypt.check_password_hash(pw_hash=hashed_password, password=raw_token)
+            print("\n\t password_compare: ", password_compare)
+            return password_compare
+        except Exception as hash_error:
+            print("\n\t compare_token: ", hash_error)
             return None
 
     @staticmethod
