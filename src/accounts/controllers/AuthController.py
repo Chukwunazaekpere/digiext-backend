@@ -62,17 +62,17 @@ class UsersAccountController(Resource):
     def sign_up(self, cleaned_request):
         logging.info("\n\t Registering a user...")
         OTPToken = Tokens.Tokens()
-        # all_users = self.Users.find()
-        # print("\n\t All users: ", all_users)
-        # for user in all_users:
-        #     print("\n\t user: ", user, user["_id"])
-        #     del_stat = self.Users.find_by_id_and_delete(user['_id'])
-        #     print("\n\t del_stat: ", del_stat)
+        all_users = self.Users.find()
+        print("\n\t All users: ", all_users)
+        for user in all_users:
+            print("\n\t user: ", user, user["_id"])
+            del_stat = self.Users.find_by_id_and_delete(user['_id'])
+            print("\n\t del_stat: ", del_stat)
         try:
             serializer = RegisterSerializer(**cleaned_request)
-            print("\n\t serializer: ", serializer)
             if serializer.is_valid():
                 hashed_password = OTPToken.hash_token(cleaned_request['password'])
+                print("\n\t hashed_password: ", hashed_password)
                 saved_user = UsersAccount.create(
                     email=cleaned_request['email'],
                     firstname=cleaned_request['firstname'],
@@ -144,10 +144,8 @@ class UsersAccountController(Resource):
                 AuthToken = Tokens.Tokens
                 otp_exists = AuthToken.verify_token(raw_token=stringified_otp, users_id=users_details['_id'])
                 print("\n\t otp_exists: ", otp_exists)
-                print("\n\t otp_email: ", otp_email)
-                print("\n\t users_details: ", users_details)
-                if otp_exists:
-                    AuthToken.delete_token(stringified_otp)
+                if otp_exists["status"]:
+                    AuthToken.delete_token(otp_exists["hashed_token"])
                     login_token = AuthToken().generate_token(token_length=60, users_id=users_details["_id"], token_purpose="Login")
                     success_data = {
                         "status": True,
@@ -157,7 +155,7 @@ class UsersAccountController(Resource):
                     }
                     print("\n\t Success: ", success_data)
                     return success_data
-            raise ValidationErr("Unrecognised OTP")
+            raise ValidationErr(otp_exists["message"])
         except Exception as verify_token_error:
             print("\n\t verify_token_error: ", verify_token_error)
             error_data = {

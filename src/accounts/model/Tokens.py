@@ -2,6 +2,7 @@ from datetime import datetime
 import hashlib
 import logging
 import secrets
+from xml.dom import ValidationErr
 from config.db_config import database_connection
 # database_connection = config.db_config.database_connection
 from . import UsersAccount
@@ -26,7 +27,7 @@ class Tokens(object):
         try:
             required_token = secrets.token_hex(token_length)[0: token_length]
             hashed_token = self.hash_token(raw_token=required_token)
-            print("\n\t hashed_token: ", hashed_token)
+            print("\n\t generate_token-hashed_token: ", hashed_token)
             tokens.insert_one({
                 "users_id": users_id,
                 "token": hashed_token,
@@ -69,7 +70,7 @@ class Tokens(object):
             # hash_sequence = hashlib.sha512()
             # hash_sequence.update(("%s%s" % (APP_SECRET, raw_token)).encode("UTF-8"))
             # hashed_token = hash_sequence.hexdigest()
-            hashed_token = bcrypt.generate_password_hash(password=raw_token)
+            hashed_token = bcrypt.generate_password_hash(password=raw_token).decode("utf-8")
             print("\n\t hashed_token: ", hashed_token)
             return hashed_token
         except Exception as hash_error:
@@ -93,19 +94,28 @@ class Tokens(object):
     def verify_token(raw_token, users_id):
         try:
             tokens = database_connection()['tokens']
-            Users = UsersAccount.UsersAccount().users
-            print("\n\t raw_token: ", raw_token)
-            hash_sequence = hashlib.sha512()
-            hash_sequence.update(("%s%s" % (APP_SECRET, raw_token)).encode("UTF-8"))
-            hashed_token = hash_sequence.hexdigest()
-            saved_token = tokens.find_one({"token": hashed_token})
+            users_details = Users.find_one({"_id": users_id})
+            saved_token = None
+            if users_details:
+                users_tokens = tokens.find({"users_id": users_id})
+                for token in users_tokens:
+                    print("\n\t token: ", token['token'])
+                    token_is_true = bcrypt.check_password_hash(pw_hash=token['token'], password=raw_token)
+                    print("\n\t token_is_true: ", token_is_true)
+                    if token_is_true:
+                        saved_token = token
+                        print("\n\t raw_token-here: ", raw_token)
+                        break
             if saved_token:
-                saved_user = Users.find_one()
-                saved_users_id = saved_user["_id"]
-                if users_id == saved_users_id:
-                    return True
-            return False
+                return {
+                    "status": True,
+                    "hashed_token": saved_token["token"]
+                }
+            raise ValidationErr("Unrecognised token")
         except Exception as hash_error:
             print("\n\t hash_error: ", hash_error)
-            return False
+            return {
+                "status": False,
+                "message": "Unrecognised token"
+            }
 

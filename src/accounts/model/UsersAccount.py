@@ -84,6 +84,7 @@ class UsersAccount(object):
                     token_purpose= "Registration",
                     users_id=receipient_details['_id'],
                 )
+                print("\n\t otp_code to send: ", otp_code)
                 context={
                     "fullname": fullname,
                     "otp_code": otp_code,

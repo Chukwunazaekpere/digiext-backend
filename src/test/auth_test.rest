@@ -16,5 +16,5 @@ Content-Type: application/json
 
 {
     "email": "channelproteam@gmail.com",
-    "otp": ["d", "d", "1", "6"]
+    "otp": ["d", "e", "7", "b"]
 }
