@@ -64,10 +64,10 @@ class UsersAccountController(Resource):
         OTPToken = Tokens.Tokens()
         print("\n\t All users: ", Users.users.find({}))
         all_users = Users.users.find({})
-        for user in all_users:
-            print("\n\t user: ", user, user["_id"])
-            del_stat = Users.find_by_id_and_delete(user['_id'])
-            print("\n\t del_stat: ", del_stat)
+        # for user in all_users:
+        #     print("\n\t user: ", user, user["_id"])
+        #     del_stat = Users.find_by_id_and_delete(user['_id'])
+        #     print("\n\t del_stat: ", del_stat)
         try:
             serializer = RegisterSerializer(**cleaned_request)
             print("\n\t serializer: ", serializer)

@@ -82,35 +82,9 @@ class PaperIndustryControllers(Resource):
                 "status_code": 400
             }
             
-    def get_registered_companies(self, users_id):
-        try:
-            all_paper_pickup_companies = PickupCompanies.find()
-            users_registered_companies = []
-            for company in all_paper_pickup_companies:
-                if str(company['users_id']) == users_id:
-                    users_registered_companies.append(company)
-            return {
-                "data": users_registered_companies,
-                "status": True,
-                "status_code": 200
-            }
-        except Exception as error:
-            return {
-                "data": None,
-                "status": False,
-                "status_code": 400
-            }
-
-
-    def get(self, users_id):
-        url = request.url
-        if "get-registered-companies" in url:
-            response = self.get_registered_companies(users_id=users_id)
-            return response, response["status_code"]
-
+ 
 
 paper_industry_routes = [
     f"/{BASE_API}/paper-industry/register-company",
-    f"{BASE_API}/utilities/companies/get-registered-companies/<users_id>"
 ]
 
