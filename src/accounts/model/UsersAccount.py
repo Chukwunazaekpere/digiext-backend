@@ -1,6 +1,6 @@
 from datetime import datetime
 import os
-from src.config.db_config import (
+from config.db_config import (
     database_connection
 )
 from flask_mail import Message

@@ -62,12 +62,12 @@ class UsersAccountController(Resource):
     def sign_up(self, cleaned_request):
         logging.info("\n\t Registering a user...")
         OTPToken = Tokens.Tokens()
-        all_users = self.Users.find()
-        print("\n\t All users: ", all_users)
-        for user in all_users:
-            print("\n\t user: ", user, user["_id"])
-            del_stat = self.Users.find_by_id_and_delete(user['_id'])
-            print("\n\t del_stat: ", del_stat)
+        # all_users = self.Users.find()
+        # print("\n\t All users: ", all_users)
+        # for user in all_users:
+        #     print("\n\t user: ", user, user["_id"])
+        #     del_stat = self.Users.find_by_id_and_delete(user['_id'])
+        #     print("\n\t del_stat: ", del_stat)
         try:
             serializer = RegisterSerializer(**cleaned_request)
             print("\n\t serializer: ", serializer)
@@ -135,6 +135,7 @@ class UsersAccountController(Resource):
             otp_code = cleaned_request['otp']
             otp_email = cleaned_request['email']
             print("\n\t otp_code: ", otp_code)
+            print("\n\t otp_email: ", otp_email)
             users_details = DBUsers.find_one({"email": otp_email})
             stringified_otp = ""
             for code in otp_code:

@@ -15,6 +15,6 @@ PUT http://localhost:8000/digiext-api/v1/users/verify-otp
 Content-Type: application/json
 
 {
-    "email": "ceo.naza.tech@@gmail.com",
-    "otp": ["9", "b", "8", "1"]
+    "email": "channelproteam@gmail.com",
+    "otp": ["d", "d", "1", "6"]
 }

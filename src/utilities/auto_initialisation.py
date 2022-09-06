@@ -19,10 +19,10 @@ def register_default_user():
     firstname = os.getenv("CONFIG_FIRSTNAME")
     lastname = os.getenv("CONFIG_LASTNAME")
     password = os.getenv("CONFIG_PASSWORD")
-    print("\n\t email: ", email)
-    print("\n\t firstname: ", firstname)
-    print("\n\t lastname: ", lastname)
-    print("\n\t password: ", password)
+    # print("\n\t email: ", email)
+    # print("\n\t firstname: ", firstname)
+    # print("\n\t lastname: ", lastname)
+    # print("\n\t password: ", password)
 
     try:
         user_exists = Users.find_one({

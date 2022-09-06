@@ -3,7 +3,7 @@ from src.paper_industry.controllers import (
     PaperIndustryControllers,
     paper_industry_routes
 )
-from src.config.environments import (
+from config.environments import (
     DevEnvVariables,
     ProdEnvVariables
 )

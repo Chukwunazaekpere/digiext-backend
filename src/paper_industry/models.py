@@ -1,4 +1,4 @@
-from src.config.db_config import (
+from config.db_config import (
     database_connection
 )
 import datetime
