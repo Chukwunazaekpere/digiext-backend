@@ -37,7 +37,7 @@ if FLASK_ENV == "development":
 else:
     ProdEnvVariables()
 
-from .src.config.db_config import database_connection
+from src.config.db_config import database_connection
 database_connection()['users']
 
 digiext_server.config['MAIL_PORT'] = os.getenv("MAIL_PORT")
