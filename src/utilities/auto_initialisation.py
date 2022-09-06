@@ -1,4 +1,5 @@
 
+import logging
 from xml.dom import ValidationErr
 from src.accounts.model import (
     UsersAccount,
@@ -11,6 +12,8 @@ import os
 
 Token = Tokens.Tokens()
 def register_default_user():
+    logging.basicConfig(level=logging.INFO)
+    logging.info("Creating a default user")
     email = os.getenv("CONFIG_EMAIL")
     phone = os.getenv("CONFIG_PHONE")
     firstname = os.getenv("CONFIG_FIRSTNAME")
@@ -31,7 +34,7 @@ def register_default_user():
                 "phone": phone,
                 "password": hashed_password
             })
-            print("\n\t User was successfully created..........")
+            logging.info("\n\t User was successfully created..........")
             return True
         raise ValidationErr("User already exists")
     except Exception as error:
