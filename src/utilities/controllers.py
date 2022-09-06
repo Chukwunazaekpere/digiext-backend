@@ -3,22 +3,26 @@ import os
 BASE_API = os.getenv("BASE_API")
 
 from ..paper_industry.models import (
-    PickupCompanies
+    PickupCompanies, PickupCompanyOwner
 )
 class UtilitiesControllers(Resource):
     def get_registered_companies(self, users_id):
         try:
             all_paper_pickup_companies = PickupCompanies.find()
+            all_paper_pickup_company_owners = PickupCompanyOwner.find()
             users_registered_companies = []
-            for company in all_paper_pickup_companies:
-                if str(company['users_id']) == users_id:
-                    users_registered_companies.append(company)
+            for company_owner in all_paper_pickup_company_owners:
+                print("\n\t company_owner: ", company_owner)
+                if str(company_owner['users_id']) == users_id:
+                    users_registered_companies.append(company_owner)
+            print("\n\t users_registered_companies: ", users_registered_companies)
             return {
                 "data": users_registered_companies,
                 "status": True,
                 "status_code": 200
             }
         except Exception as error:
+            print("\n\t get_registered_companies: ", error)
             return {
                 "data": None,
                 "status": False,
@@ -44,12 +48,16 @@ class UtilitiesControllers(Resource):
     def get(self):
         try:
             url = request.url
-            print("\n\t Get industries: ", url.split("/"))
+            # print("\n\t Get industries: ", url.split("/"))
             if "industry-list" in url:
                 industry_list = self.list_all_industries()
                 print("\n\t industry_list: ", industry_list)
                 return industry_list, 200
             elif "get-registered-companies" in url:
+                args = request.args
+                args = args.to_dict()
+                users_id = args["users-id"]
+                # print(args)
                 response = self.get_registered_companies(users_id=users_id)
                 return response, response["status_code"]
         except Exception as error:
@@ -60,5 +68,5 @@ class UtilitiesControllers(Resource):
 utilities_routes = [
     f"{BASE_API}/utilities/get-industry-list",
     f"{BASE_API}/utilities/get-logs",
-    f"{BASE_API}/utilities/companies/get-registered-companies?users-id"
+    f"{BASE_API}/utilities/companies/get-registered-companies"
 ]
