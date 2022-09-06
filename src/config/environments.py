@@ -40,8 +40,9 @@ class DevEnvVariables(BaseConfig):
 
 class ProdEnvVariables(BaseConfig):
     def __init__(self) -> None:
-        print("\n\t PROD_DB_URL: ", os.getenv("PROD_DB_URL"))
+        print("\n\t ProdEnvVariables-PROD_DB_URL: ", os.getenv("PROD_DB_URL"))
         os.environ["DB_URL"] = os.getenv("PROD_DB_URL")
+        print("\n\t ProdEnvVariables-DB_URL: ", os.getenv("DB_URL"))
         os.environ["DEBUG"] = "False"
 
 
