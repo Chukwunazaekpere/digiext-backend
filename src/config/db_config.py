@@ -2,7 +2,7 @@ from pymongo import MongoClient
 import os
 import logging
 
-PROD_DB_URL = "mongodb+srv://Chukwunazaekpere:Chemmaco%401958@authentification.cu4aa.mongodb.net/DigiextDB?retryWrites=true&w=majority"
+# PROD_DB_URL = "mongodb+srv://Chukwunazaekpere:Chemmaco%401958@authentification.cu4aa.mongodb.net/DigiextDB?retryWrites=true&w=majority"
 
 def database_connection():
     try:
@@ -10,7 +10,7 @@ def database_connection():
         logging.info("Digiext is initiating a databse connection...")
         DB_URL = os.getenv("DB_URL")
         print("\n\t DB_URL: ", DB_URL)
-        db_client = MongoClient(host=PROD_DB_URL)
+        db_client = MongoClient(host=DB_URL)
         digiext_db = db_client["digiext_db"]
         logging.info("Digiext successfully connected to the databse...")
         return digiext_db
