@@ -18,3 +18,12 @@ Content-Type: application/json
     "email": "channelproteam@gmail.com",
     "otp": ["d", "e", "7", "b"]
 }
+
+###
+POST http://localhost:8000/digiext-api/v1/users/login
+Content-Type: application/json
+
+{
+    "email": "channelproteam@gmail.com",
+    "password": "12345678"
+}

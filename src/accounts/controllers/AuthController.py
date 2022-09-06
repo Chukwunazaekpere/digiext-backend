@@ -26,7 +26,7 @@ class UsersAccountController(Resource):
             print("\n\t Login: ", cleaned_request)
             password = cleaned_request['password']
             email = cleaned_request['email']
-            user_exists = self.Users.find_one({"email": email})
+            user_exists = DBUsers.find_one({"email": email})
             error_message = "User does not exist."
             if user_exists:
                 print("\n\t user_exists: ", user_exists)
