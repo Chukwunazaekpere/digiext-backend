@@ -12,7 +12,7 @@ from ..serializers.auth_serializers import (
 from ..model.UsersAccount import (
     UsersAccount,
 ) 
-from ..model.UsersAccount import Users
+from ..model.UsersAccount import Users as DBUsers
 from src.utilities.models import UtilityModels, UserLogs
 
 BASE_API = os.getenv("BASE_API")
@@ -20,12 +20,13 @@ BASE_API = f"{BASE_API}/users"
 
 class UsersAccountController(Resource):
     logging.basicConfig(level=logging.INFO)
+    Users = UsersAccount()
     def login(self, cleaned_request):
         try:
             print("\n\t Login: ", cleaned_request)
             password = cleaned_request['password']
             email = cleaned_request['email']
-            user_exists = Users.find_one({"email": email})
+            user_exists = self.Users.find_one({"email": email})
             error_message = "User does not exist."
             if user_exists:
                 print("\n\t user_exists: ", user_exists)
@@ -58,16 +59,15 @@ class UsersAccountController(Resource):
             }
 
 
-    def sign_up(elf, cleaned_request):
+    def sign_up(self, cleaned_request):
         logging.info("\n\t Registering a user...")
-        Users = UsersAccount()
         OTPToken = Tokens.Tokens()
-        # print("\n\t All users: ", Users.)
-        # all_users = Users.users.find({})
-        # for user in all_users:
-        #     print("\n\t user: ", user, user["_id"])
-        #     del_stat = Users.find_by_id_and_delete(user['_id'])
-        #     print("\n\t del_stat: ", del_stat)
+        all_users = self.Users.find()
+        print("\n\t All users: ", all_users)
+        for user in all_users:
+            print("\n\t user: ", user, user["_id"])
+            del_stat = self.Users.find_by_id_and_delete(user['_id'])
+            print("\n\t del_stat: ", del_stat)
         try:
             serializer = RegisterSerializer(**cleaned_request)
             print("\n\t serializer: ", serializer)
@@ -82,7 +82,7 @@ class UsersAccountController(Resource):
                 )
                 print("\n\t saved_user: ", saved_user)
                 if saved_user:
-                    mail_status = Users.send_registration_email(receipients_email=cleaned_request['email'], fullname=f"{cleaned_request['firstname']} {cleaned_request['lastname']}")
+                    mail_status = self.Users.send_registration_email(receipients_email=cleaned_request['email'], fullname=f"{cleaned_request['firstname']} {cleaned_request['lastname']}")
                     print("\n\t mail_status: ", mail_status)
                     if mail_status['status']:
                         logging.info("Registration was successful.")
@@ -130,7 +130,7 @@ class UsersAccountController(Resource):
             otp_code = cleaned_request['otp']
             otp_email = cleaned_request['email']
             print("\n\t otp_code: ", otp_code)
-            users_details = UsersAccount.users.find_one({"email": otp_email})
+            users_details = DBUsers.find_one({"email": otp_email})
             stringified_otp = ""
             for code in otp_code:
                 stringified_otp += code
@@ -177,7 +177,7 @@ class UsersAccountController(Resource):
 
 
     def get_profile_details(self, users_id):
-        user = Users.find_one({"_id": users_id})
+        user = self.Users.find_one({"_id": users_id})
         if user:
             return {
                 "data": user

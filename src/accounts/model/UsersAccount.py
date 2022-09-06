@@ -26,10 +26,10 @@ class UsersAccount(object):
             print("\n\t get_fullname_error: ", get_fullname_error)
             return None
 
-
-    def find_by_id_and_delete(self, id):
+    @staticmethod
+    def find_by_id_and_delete(id):
         try:
-            self.users.delete_one({
+            Users.delete_one({
                 "_id": id
             })
             return True
@@ -53,6 +53,11 @@ class UsersAccount(object):
         except Exception as save_user_error:
             print("\n\t save_user_error: ", save_user_error)
             return False
+
+    @staticmethod
+    def find():
+        all_users = Users.find({})
+        return all_users
     
 
     @staticmethod
@@ -66,24 +71,19 @@ class UsersAccount(object):
         except:
             return False
 
-
-  
-    
-
     
     def send_registration_email(self, receipients_email: str, fullname: str):
         mail_subject = "Registration Token From Digiext"
         print("\n\t receipients_email: ", receipients_email)
         try:
             tokens = Tokens.Tokens()
-            receipient_details = self.users.find_one({"email": receipients_email})
+            receipient_details = Users.find_one({"email": receipients_email})
             if receipient_details:
                 otp_code = tokens.generate_token(
                     token_length= 4,
                     token_purpose= "Registration",
                     users_id=receipient_details['_id'],
                 )
-                print("\n\t receipient_details: ", receipient_details)
                 context={
                     "fullname": fullname,
                     "otp_code": otp_code,
@@ -91,12 +91,14 @@ class UsersAccount(object):
                     "year": datetime.now().year,
                     "subject":"Registration Mail From Digiext",
                 }
+                print("\n\t receipient_details: ", receipient_details)
                 email_message = Message(
                     subject=mail_subject,
                     sender=os.getenv("ADMIN_EMAIL"),
                     recipients=[receipients_email],
                     html=render_template(template_name_or_list="otp.html", **context)
                 )
+                print("\n\t email_message: ", email_message)
                 server.send_mail.send(email_message)
                 return {
                     "status": True,
