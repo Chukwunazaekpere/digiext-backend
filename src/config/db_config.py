@@ -8,6 +8,7 @@ def database_connection():
         logging.basicConfig(level=logging.INFO)
         logging.info("Digiext is initiating a databse connection...")
         DB_URL = os.getenv("DB_URL")
+        print("\n\t DB_URL: ", DB_URL)
         db_client = MongoClient(host=DB_URL)
         digiext_db = db_client["digiext_db"]
         logging.info("Digiext successfully connected to the databse...")
