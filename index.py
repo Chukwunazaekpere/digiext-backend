@@ -9,5 +9,5 @@ PORT = os.getenv("PORT")
 
 digiext_server.run(
     debug=DEBUG,
-    port=PORT
+    port=PORT,
 )
