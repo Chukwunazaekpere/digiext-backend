@@ -10,13 +10,10 @@ def database_connection():
         logging.info("Digiext is initiating a databse connection...")
         DB_URL = os.getenv("DB_URL")
         PROD_DB_URL = os.getenv("PROD_DB_URL")
+        LOCAL_DB_URL = os.getenv("LOCAL_DB_URL")
+
         FLASK_ENV = os.getenv("FLASK_ENV")
-
-        print("\n\t database_connection-DB_URL: ", DB_URL)
-        print("\n\t database_connection-FLASK_ENV: ", FLASK_ENV)
-        print("\n\t database_connection-PROD_DB_URL: ", PROD_DB_URL)
-
-        db_client = MongoClient(host=PROD_DB_URL)
+        db_client = MongoClient(host=PROD_DB_URL if FLASK_ENV != "development" else LOCAL_DB_URL)
         digiext_db = db_client["digiext_db"]
         logging.info("Digiext successfully connected to the databse...")
         return digiext_db

@@ -9,7 +9,7 @@ print("\m\t ENV: ",  os.path.join(os.path.dirname( __file__), ".env"))
 class BaseConfig(object):
     def __init__(self) -> None:
         os.environ["FLASK_ENV"] = os.getenv("FLASK_ENV")
-        print("\n\t FLASK_ENV: ", os.getenv("FLASK_ENV"))
+        # print("\n\t FLASK_ENV: ", os.getenv("FLASK_ENV"))
         os.environ["BASE_API"] = os.getenv("BASE_API")
         os.environ["PORT"] = os.getenv("PORT")
         os.environ["DB_NAME"] = os.getenv("DB_NAME")
