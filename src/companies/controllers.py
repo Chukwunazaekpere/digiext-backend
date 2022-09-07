@@ -2,13 +2,14 @@ from datetime import datetime
 from xml.dom import ValidationErr
 from ..utilities.authenticate import authenticate_requests
 import json
-from traceback import print_tb
 from flask_restful import Resource, request
 from .serializers import CompanySerializer
 from .models import (
     Companies,
     Industries
 )
+
+from src.accounts.model.UsersAccount import UsersAccount
 import os
 BASE_API = os.getenv("BASE_API")
 from src.utilities.models import (
@@ -51,7 +52,7 @@ class CompanyControllers(Resource):
             if serializer.is_valid():
                 industry_details = self.Industry.find_by_industry_name(industry_name)
                 if industry_details:
-                    self.Company.create_company(
+                    new_company = self.Company.create_company(
                         industry_id=industry_details["_id"],
                         companys_owner_id=authenticated_user["_id"],
                         company_address=company_details["company_address"],
@@ -60,6 +61,10 @@ class CompanyControllers(Resource):
                         company_cac=company_details["company_cac"],
                         company_primary_phone=company_details["company_phone"],
                     )
+                    Users = UsersAccount()
+                    Users.find_by_id_and_update(authenticated_user["_id"], {
+                        "registered_companies": authenticated_user["registered_companies"].append(new_company)
+                    })
                     new_log = UserLogs.insert_one({
                         "action": f"Created a new company, in the {industry_name}", 
                         "users_id": authenticated_user["_id"],

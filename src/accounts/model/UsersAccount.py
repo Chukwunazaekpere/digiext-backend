@@ -8,7 +8,7 @@ from flask import render_template, render_template_string
 from . import Tokens 
 import server
 # from src import server
-
+from pymongo.collection import ObjectId
 
 Users = database_connection()["users"]
 class UsersAccount(object):
@@ -35,6 +35,15 @@ class UsersAccount(object):
             return True
         except Exception as find_by_id_and_delete_error:
             print("\n\t find_by_id_and_delete_error: ", find_by_id_and_delete_error)
+            return False
+
+    @staticmethod
+    def find_by_id_and_update(id, **data):
+        try:
+            Users.find_one_and_update({"_id": ObjectId(id)}, {**data})
+            return True
+        except Exception as find_by_id_and_update:
+            print("\n\t find_by_id_and_update: ", find_by_id_and_update)
             return False
 
 
