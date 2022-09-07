@@ -27,3 +27,8 @@ Content-Type: application/json
     "email": "channelproteam@gmail.com",
     "password": "12345678"
 }
+
+
+###
+GET http://localhost:8000/digiext-api/v1/companies/get-industry-list
+Content-Type: application/json

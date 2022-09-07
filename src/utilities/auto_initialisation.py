@@ -1,29 +1,23 @@
-
-import logging
 from xml.dom import ValidationErr
 from src.accounts.model import (
     UsersAccount,
     Tokens
 )
+from .logging_helper import logging_helper
 from src.accounts.model.UsersAccount import (
     Users
 )
+from src.companies.models import Industries
 import os
 
 Token = Tokens.Tokens()
 def register_default_user():
-    logging.basicConfig(level=logging.INFO)
-    logging.info("Creating a default user")
+    logging_helper("info", "Creating a default user")
     email = os.getenv("CONFIG_EMAIL")
     phone = os.getenv("CONFIG_PHONE")
     firstname = os.getenv("CONFIG_FIRSTNAME")
     lastname = os.getenv("CONFIG_LASTNAME")
     password = os.getenv("CONFIG_PASSWORD")
-    # print("\n\t email: ", email)
-    # print("\n\t firstname: ", firstname)
-    # print("\n\t lastname: ", lastname)
-    # print("\n\t password: ", password)
-
     try:
         user_exists = Users.find_one({
             "firstname": firstname,
@@ -39,10 +33,32 @@ def register_default_user():
                 "phone": phone,
                 "password": hashed_password
             })
-            logging.info("\n\t User was successfully created..........")
+            logging_helper("info", "\n\t User was successfully created..........")
             return True
         raise ValidationErr("User already exists")
     except Exception as error:
-        print("\n\t User exists..........", error)
+        logging_helper("info", f"\n\t User exists.......... {error}")
         return False
+
+
+def create_default_industries():
+    try:
+        logging_helper("info", "\n\t Creating default industries.")
+        industry_list = ["Paper", "Agriculture", "Manufacturing", "Food", "Electrical", "Maintenance"]
+        Industry = Industries()
+
+        for industry in industry_list:
+            creation_status = Industry.create_industry(industry_name=industry)
+            print("\n\t creation_status: ", creation_status)
+            if creation_status["status"]: 
+                logging_helper("info", f"\n\t Created {industry} industry")
+            else:
+                logging_helper("info", f"\n\t {industry} industry already exists")
+        logging_helper("info", f"\n\t Finished default industry creation")
+        return True
+    except Exception as error:
+        logging_helper("error", f"\n\t {error} ")
+
+
+
 

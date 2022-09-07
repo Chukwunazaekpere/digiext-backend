@@ -112,7 +112,7 @@ class UsersAccountController(Resource):
             print("\n\t cleaned_request: ", cleaned_request)
             if "login" in url:
                 post_response = self.login(cleaned_request)
-                response_data = {"data": post_response['data'], "status": post_response['status'], "message": post_response['message']}
+                response_data = {"auth_token": post_response['data'], "status": post_response['status'], "message": post_response['message']}
                 return response_data, post_response['status_code']
             elif 'register' in str(url):
                 logging.info("\n\t Registering a user...")
@@ -149,7 +149,7 @@ class UsersAccountController(Resource):
                     login_token = AuthToken().generate_token(token_length=60, users_id=users_details["_id"], token_purpose="Login")
                     success_data = {
                         "status": True,
-                        "login_token": login_token,
+                        "auth_token": login_token,
                         "status_code": 201,
                         "message": "Verification was successful"
                     }
@@ -172,7 +172,7 @@ class UsersAccountController(Resource):
         print("\n\t request.base_url: ", request.base_url)
         if "verify-otp" in url:
             verify_response = self.verify_auth_token(cleaned_request)
-            response_data = {"status": verify_response['status'], "message": verify_response['message']}
+            response_data = {"auth_token": verify_response["auth_token"], "status": verify_response['status'], "message": verify_response['message']}
             return response_data, verify_response['status_code']
         elif "authenticate" in url:
             authenticate_response = self.authenticate_user(cleaned_request=cleaned_request)

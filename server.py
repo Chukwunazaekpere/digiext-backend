@@ -1,7 +1,7 @@
 import os
-from src.paper_industry.controllers import (
-    PaperIndustryControllers,
-    paper_industry_routes
+from src.companies.controllers import (
+    CompanyControllers,   
+    company_routes
 )
 from config.environments import (
     DevEnvVariables,
@@ -17,7 +17,10 @@ from src.utilities.controllers import (
     UtilitiesControllers,
     utilities_routes,
 )
-from src.utilities.auto_initialisation import register_default_user
+from src.utilities.auto_initialisation import (
+    register_default_user,
+    create_default_industries
+)
 
 import logging
 from flask_mail import Mail, Message
@@ -52,6 +55,9 @@ digiext_server.config['MAIL_USE_SSL'] = True
 send_mail = Mail(digiext_server)
 digiext_api.add_resource(UsersAccountController, *auth_routes)
 digiext_api.add_resource(UtilitiesControllers, *utilities_routes)
-digiext_api.add_resource(PaperIndustryControllers, *paper_industry_routes)
+digiext_api.add_resource(CompanyControllers, *company_routes)
 
+
+# Default data
 register_default_user()
+create_default_industries()

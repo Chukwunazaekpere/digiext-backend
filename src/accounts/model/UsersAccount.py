@@ -47,6 +47,8 @@ class UsersAccount(object):
                 "email": email,
                 "phone": phone,
                 "password": password,
+                "registered_companies": [],
+                "requested_services": [],
                 "date_registered": datetime.now()
             })
             return new_user
