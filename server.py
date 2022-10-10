@@ -17,6 +17,10 @@ from src.utilities.controllers import (
     UtilitiesControllers,
     utilities_routes,
 )
+from src.appointments.controllers import (
+    AppointmentsController,
+    appointment_routes
+)
 from src.utilities.auto_initialisation import (
     register_default_user,
     create_default_industries
@@ -56,6 +60,7 @@ send_mail = Mail(digiext_server)
 digiext_api.add_resource(UsersAccountController, *auth_routes)
 digiext_api.add_resource(UtilitiesControllers, *utilities_routes)
 digiext_api.add_resource(CompanyControllers, *company_routes)
+digiext_api.add_resource(AppointmentsController, *appointment_routes)
 
 
 # Default data

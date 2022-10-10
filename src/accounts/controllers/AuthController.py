@@ -181,12 +181,25 @@ class UsersAccountController(Resource):
 
 
     def get_profile_details(self, users_id):
-        user = self.Users.find_one({"_id": users_id})
-        if user:
+        try:
+            print("\n\t -get_profile_detailsusers_id: ", users_id)
+            user = self.Users.find_one(id=users_id)
+            print("\n\t User: ", user)
+            if user:
+                data = {
+                    **user,
+                    "_id": str(user['_id'])
+                }
+                return {
+                    "data": data,
+                    "status_code": 200
+                }
+        except:
             return {
-                "data": user
-            }
-        return None
+                    "data": None,
+                    "status_code": 500
+                }
+
     
 
     def authenticate_user(self, cleaned_request):
@@ -222,7 +235,6 @@ class UsersAccountController(Resource):
                 "status_code": 403,
                 "message": str(authenticate_user_exception)
             }
-
     
     def get(self, users_id):
         try:
@@ -237,6 +249,9 @@ class UsersAccountController(Resource):
                 authenticate_response = self.authenticate_user(token=users_id)
                 print("\n\t authenticate_response: ", authenticate_response)
                 return authenticate_response, authenticate_response['status_code']
+            elif "details" in url:
+                user_details_response = self.get_profile_details(users_id=users_id)
+                return user_details_response, user_details_response["status_code"]
         except Exception as error:
             print("\n\t error: ", error)
 
@@ -251,4 +266,5 @@ auth_routes = [
     f"{BASE_API}/profiles/<users_id>",
     f"{BASE_API}/authenticate-user/<users_id>",
     f"{BASE_API}/authenticate-user",
+    f"{BASE_API}/details/<users_id>",
 ]

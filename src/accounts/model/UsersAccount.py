@@ -9,6 +9,7 @@ from . import Tokens
 import server
 # from src import server
 from pymongo.collection import ObjectId
+from pymongo import ReturnDocument
 
 Users = database_connection()["users"]
 class UsersAccount(object):
@@ -37,13 +38,28 @@ class UsersAccount(object):
             print("\n\t find_by_id_and_delete_error: ", find_by_id_and_delete_error)
             return False
 
-    @staticmethod
-    def find_by_id_and_update(id, **data):
+
+    def find_by_id_and_update(self, id, data):
+        print("\n\t find_by_id_and_update: ", data)
         try:
-            Users.find_one_and_update({"_id": ObjectId(id)}, {**data})
+            Users.find_one_and_update()
+            Users.find_one_and_update(
+                {"_id": ObjectId(id)}, 
+                {"$inc": {**data}},
+                return_document=ReturnDocument.AFTER
+            )
             return True
         except Exception as find_by_id_and_update:
             print("\n\t find_by_id_and_update: ", find_by_id_and_update)
+            return False
+
+    def find_one(self, id):
+        print("\n\t find_one: ", id)
+        try:
+            user = Users.find_one({"_id": ObjectId(id)})
+            return user
+        except Exception as find_one_error:
+            print("\n\t find_one_error: ", find_one_error)
             return False
 
 

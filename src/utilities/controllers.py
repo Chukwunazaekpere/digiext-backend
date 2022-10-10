@@ -5,9 +5,6 @@ BASE_API = os.getenv("BASE_API")
 
 class UtilitiesControllers(Resource):
   
-    
-    
-    
     def get_logs(self):
         industry_list = ["Paper", "Agriculture", "Manufacturing", "Food"]
         return {

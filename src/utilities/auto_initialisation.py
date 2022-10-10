@@ -44,11 +44,12 @@ def register_default_user():
 def create_default_industries():
     try:
         logging_helper("info", "\n\t Creating default industries.")
-        industry_list = ["Paper", "Agriculture", "Manufacturing", "Food", "Electrical", "Maintenance"]
+        industry_list = ["Wastes", "Machineries", "Uber", "Manufacturing", "Food", "Maintenance"]
         Industry = Industries()
 
         for industry in industry_list:
             creation_status = Industry.create_industry(industry_name=industry)
+            # creation_status = Industry.delete_industry(industry_name="Electrical")
             print("\n\t creation_status: ", creation_status)
             if creation_status["status"]: 
                 logging_helper("info", f"\n\t Created {industry} industry")

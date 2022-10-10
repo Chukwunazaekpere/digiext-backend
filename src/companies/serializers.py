@@ -9,11 +9,13 @@ from .models import (
 class CompanySerializer(object):
     def __init__(
         self, company_name, company_address, company_email, company_cac,
-        company_phone, 
+        company_phone, company_slogan, company_logo
         ) -> None:
         self.company_name = company_name
         self.company_address = company_address
         self.company_email = company_email
+        self.company_slogan = company_slogan
+        self.company_logo = company_logo
         # print("\n\t company_email: ", self.company_email)
         self.company_phone = company_phone
         self.company_cac = company_cac
@@ -28,6 +30,8 @@ class CompanySerializer(object):
             raise ValidationErr("Please provide the company valid email")
         elif not self.company_phone or len(self.company_phone) <= 10:
             raise ValidationErr("Please provide a valid company phone number")
+        elif not self.company_slogan or len(self.company_slogan) <= 3:
+            raise ValidationErr("Please provide your company slogan.")
         return True
 
     # def validate_owner_bio_data(self):
@@ -48,14 +52,18 @@ class CompanySerializer(object):
 
 
     def is_valid(self):
-        pickup_company_details = self.validate_new_company()
-        if type(pickup_company_details) == str:
-            return False
-        
-        # owner_bio_data = self.validate_owner_bio_data()
-        # if type(owner_bio_data) == str:
-        #     return False
-        return True
+        try:
+            pickup_company_details = self.validate_new_company()
+            print("\n\t pickup_company_details: ", pickup_company_details)
+            if type(pickup_company_details) == str:
+                return False
+            
+            # owner_bio_data = self.validate_owner_bio_data()
+            # if type(owner_bio_data) == str:
+            #     return False
+            return True
+        except Exception as companies_serializer_is_valid_errors:
+            print("\n\t companies_serializer_is_valid_errors: ", companies_serializer_is_valid_errors)
 
     def errors(self):
         pickup_company_details = self.validate_new_company()
