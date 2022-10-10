@@ -1,5 +1,10 @@
+import datetime
 import json
-import logging
+from src.utilities.models import (
+    UserLogs,
+    UtilityModels
+)
+
 from src.utilities.logging_helper import logging_helper
 import os
 from flask_restful import Resource, request
@@ -55,11 +60,11 @@ class AppointmentsController(Resource):
                     company_id=data_to_validate["company_id"], 
                     data_to_update={"company_bookings": company_bookings}
                 )
-                UserLogs.insert_one({
-                    "action": f"Created a new company, in the {industry_name}", 
-                    "users_id": authenticated_user["_id"],
-                    "date_created": datetime.now()
-                })
+                # UserLogs.insert_one({
+                #     "action": f"Created a new company, in the {industry_name}", 
+                #     "users_id": authenticated_user["_id"],
+                #     "date_created": datetime.now()
+                # })
                 return {
                     "message": f"Appointment with {appointed_company['company_name']} comapny has been successfully placed.",
                     "status_code": 201
