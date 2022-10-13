@@ -77,9 +77,49 @@ class AppointmentsController(Resource):
                 "status_code": 500
             }
 
+    def get_user_appointments(self, users_id):
+        try:
+            users_appointments = self.UsersAppointments.get_users_appointments(users_id=users_id)
+            # print("\n\t users_appointments: ", users_appointments)
+            requiredAppointmentData = []
+            for appointment in users_appointments:
+                company_id = appointment['waste_company_id']
+                company_details = self.RegisteredCompanies.find_by_id(company_id)
+                # print("\n\t company_details: ", company_details)
+                if company_details:
+                    data = {
+                        "company_name": company_details["company_name"],
+                        "company_phone": company_details["company_primary_phone"],
+                        "company_email": company_details["company_primary_email"],
+                        "company_address": company_details["company_address"],
+                        "pick_up_time": appointment["pick_up_time"],
+                        "pick_up_interval": appointment["pick_up_interval"],
+                        "status": appointment["status"],
+                        "date_created": str(appointment["date_created"]),
+                    }
+                    requiredAppointmentData.append(data)
+                    print("\n\t appointment: ", appointment)
+            return {
+                "data": requiredAppointmentData,
+                "status_code": 200
+            } 
+        except Exception as get_user_appointments_error:
+            print("\n\t get_user_appointments_error: ", get_user_appointments_error)
+            return {
+                "data": [],
+                "status_code": 500
+            }
 
+
+    def get(self, users_id):
+        print("\n\t users_id: ", users_id)
+        url = request.url
+        if "get-user-appointments" in url:
+            response = self.get_user_appointments(users_id)
+            print("\n\t response: ", response)
+            return response, response["status_code"]
 
 appointment_routes = [
     f"{BASE_API}/create-wastes-appointment",
-    f"{BASE_API}/get-user-appointments/<user_id>",
+    f"{BASE_API}/get-user-appointments/<users_id>",
 ]

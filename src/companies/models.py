@@ -112,10 +112,9 @@ class Companies(object):
 
     """Get a company by id"""
     def find_by_id(self, company_id):
-        # company_id = str(ObjectId(company_id))
-        print("\n\t find_by_id: ", company_id)
+        # print("\n\t find_by_id: ", company_id)
         company = self.Company.find_one({"_id": ObjectId(company_id)})
-        print("\n\t company-find_by_id: ", company)
+        # print("\n\t company-find_by_id: ", company)
         if company:
             return company
         return None

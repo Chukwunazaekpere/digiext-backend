@@ -1,5 +1,7 @@
 from datetime import datetime
 from config.db_config import database_connection
+from pymongo.collection import ObjectId
+
 
 from src.utilities.logging_helper import logging_helper
 class Appointments(object):
@@ -31,6 +33,9 @@ class Appointments(object):
         try:
             users_appointments = self.appointments.find({"users_id": users_id})
             # logging_helper("info", "")
+            print("\n\t users_appointments: ", users_appointments)
+            # for appointment in self.appointments.find():
+            #     print("\n\t appointment: ", appointment)
             return users_appointments
         except Exception as get_users_appointments_error:
             logging_helper("error", get_users_appointments_error)
