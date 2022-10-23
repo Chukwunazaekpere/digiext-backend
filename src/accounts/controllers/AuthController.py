@@ -4,6 +4,7 @@ import logging
 from xml.dom import ValidationErr
 from flask_restful import Resource, request
 import os
+
 from src.utilities.authenticate import authenticate_requests
 from ..model import Tokens
 from ..serializers.auth_serializers import (
@@ -21,6 +22,7 @@ BASE_API = f"{BASE_API}/users"
 class UsersAccountController(Resource):
     logging.basicConfig(level=logging.INFO)
     Users = UsersAccount()
+    AuthToken = Tokens.Tokens
     def login(self, cleaned_request):
         try:
             print("\n\t Login: ", cleaned_request)
@@ -82,7 +84,12 @@ class UsersAccountController(Resource):
                 )
                 print("\n\t saved_user: ", saved_user)
                 if saved_user:
-                    mail_status = self.Users.send_registration_email(receipients_email=cleaned_request['email'], fullname=f"{cleaned_request['firstname']} {cleaned_request['lastname']}")
+                    mail_status = self.Users.send_registration_email(
+                        receipients_email=cleaned_request['email'], 
+                        fullname=f"{cleaned_request['firstname']} {cleaned_request['lastname']}", 
+                        email_template="otp.html",
+                        mail_subject="Registration Token From Digiext"
+                    )
                     print("\n\t mail_status: ", mail_status)
                     if mail_status['status']:
                         logging.info("Registration was successful.")
@@ -141,12 +148,11 @@ class UsersAccountController(Resource):
             for code in otp_code:
                 stringified_otp += code
             if users_details:
-                AuthToken = Tokens.Tokens
-                otp_exists = AuthToken.verify_token(raw_token=stringified_otp, users_id=users_details['_id'])
+                otp_exists = self.AuthToken.verify_token(raw_token=stringified_otp, users_id=users_details['_id'])
                 print("\n\t otp_exists: ", otp_exists)
                 if otp_exists["status"]:
-                    AuthToken.delete_token(otp_exists["hashed_token"])
-                    login_token = AuthToken().generate_token(token_length=60, users_id=users_details["_id"], token_purpose="Login")
+                    self.AuthToken.delete_token(otp_exists["hashed_token"])
+                    login_token = self.AuthToken().generate_token(token_length=60, users_id=users_details["_id"], token_purpose="Login")
                     success_data = {
                         "status": True,
                         "auth_token": login_token,
@@ -178,6 +184,22 @@ class UsersAccountController(Resource):
             authenticate_response = self.authenticate_user(cleaned_request=cleaned_request)
             print("\n\t authenticate_response: ", authenticate_response)
             return authenticate_response, authenticate_response['status_code']
+        elif "update" in url:
+            profile_update_response = self.update_users_details(request_data=cleaned_request)
+            return profile_update_response, profile_update_response["status_code"]
+        elif "verify-credentials" in url:
+            verify_credentials_otp = self.verify_credentials_otp(request_data=cleaned_request)
+            return verify_credentials_otp, verify_credentials_otp["status_code"]
+        
+
+    def verify_credentials_otp(self, request_data):
+        otp_code = request_data["otpCode"]
+        users_id = request_data["usersId"]
+        user = self.Users.find_one(id=users_id)
+        if user:
+            otp_exists = self.AAuthToken.verify_token(raw_token=otp_code, users_id=users_id)
+
+
 
 
     def get_profile_details(self, users_id):
@@ -235,6 +257,71 @@ class UsersAccountController(Resource):
                 "status_code": 403,
                 "message": str(authenticate_user_exception)
             }
+
+    def get_user_logs(self, users_id):
+        try:
+            users_log = UserLogs.find({"users_id": users_id})
+            if users_log:
+                for log in users_log:
+                    print("\n\t log: ", log)
+            return {
+                "data": users_log,
+                "status_code": 200
+            }
+        except Exception as log_exception:
+            print("\n\t log_exception: ", log_exception)
+            return {
+                "data": users_log,
+                "status_code": 500
+            }
+
+    def update_users_details(self, request_data):
+        try:
+            print("\n\t request_data: ", request_data)
+            users_id = request_data["usersId"]
+            existing_data = self.Users.find_one(users_id)
+            if existing_data:
+                print("\n\t existing_data: ", existing_data)
+                data_to_update = {
+                    "firstname": request_data["firstname"],
+                    "lastname": request_data["lastname"],
+                    "phone": request_data["phone"],
+                }
+                self.Users.find_by_id_and_update(id=users_id, data={**data_to_update})
+                return {
+                    "message": "Profile has been successfully updated.",
+                    "status_code": 200,
+                }
+            raise ValidationErr("An error was encountered")
+        except Exception as update_profile_error:
+            return {
+                "message": "Profile was not updated this time.",
+                "status_code": 500,
+            }
+
+    def change_credentials(self, users_id):
+        try:
+            user = self.Users.find_one(users_id)
+            if user:
+                mail_status = self.Users.send_registration_email(
+                    receipients_email=user['email'], 
+                    fullname=f"{user['firstname']} {user['lastname']}", 
+                    email_template="change_credentials.html",
+                    mail_subject="COC Token From Digiext"
+                )
+                if mail_status:
+                    return {
+                        "message": "Digiext honoured your request. Please check your email to continue.",
+                        "status_code": 200,
+                        "data": {"otp_code": mail_status["otp_code"]}
+                    }
+            raise ValidationErr("Error")
+        except Exception as change_credentials_error:
+            return {
+                "message": "Digiext could not honour your request. Please try again.",
+                "status_code": 500
+            }
+
     
     def get(self, users_id):
         try:
@@ -245,6 +332,7 @@ class UsersAccountController(Resource):
             print("\n\t users_id: ", users_id)
             if "profiles" in url:
                 profile_response = self.get_profile_details(users_id=users_id)
+                return profile_response, profile_response["status_code"]
             elif "authenticate" in url:
                 authenticate_response = self.authenticate_user(token=users_id)
                 print("\n\t authenticate_response: ", authenticate_response)
@@ -252,6 +340,13 @@ class UsersAccountController(Resource):
             elif "details" in url:
                 user_details_response = self.get_profile_details(users_id=users_id)
                 return user_details_response, user_details_response["status_code"]
+            elif "logs" in url:
+                user_logs_response = self.get_user_logs(users_id=users_id)
+                return user_logs_response, user_logs_response["status_code"]
+            elif "credentials" in url:
+                credentials_response = self.change_credentials(users_id=users_id)
+                return credentials_response, credentials_response["status_code"]
+         
         except Exception as error:
             print("\n\t error: ", error)
 
@@ -267,4 +362,8 @@ auth_routes = [
     f"{BASE_API}/authenticate-user/<users_id>",
     f"{BASE_API}/authenticate-user",
     f"{BASE_API}/details/<users_id>",
+    f"{BASE_API}/update-profile-details",
+    f"{BASE_API}/logs/<users_id>",
+    f"{BASE_API}/change-credentials/<users_id>",
+    f"{BASE_API}/users/verify-credentials-otp",
 ]

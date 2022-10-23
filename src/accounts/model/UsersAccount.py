@@ -40,17 +40,16 @@ class UsersAccount(object):
 
 
     def find_by_id_and_update(self, id, data):
-        print("\n\t find_by_id_and_update: ", data)
+        # print("\n\t find_by_id_and_update: ", data)
         try:
-            Users.find_one_and_update()
             Users.find_one_and_update(
                 {"_id": ObjectId(id)}, 
-                {"$inc": {**data}},
+                {"$set": {**data}},
                 return_document=ReturnDocument.AFTER
             )
             return True
         except Exception as find_by_id_and_update:
-            print("\n\t find_by_id_and_update: ", find_by_id_and_update)
+            print("\n\t find_by_id_and_update_error: ", find_by_id_and_update)
             return False
 
     def find_one(self, id):
@@ -99,8 +98,8 @@ class UsersAccount(object):
             return False
 
     
-    def send_registration_email(self, receipients_email: str, fullname: str):
-        mail_subject = "Registration Token From Digiext"
+    def send_registration_email(self, receipients_email: str, fullname: str, email_template: str, mail_subject: str):
+        mail_subject = mail_subject 
         print("\n\t receipients_email: ", receipients_email)
         try:
             tokens = Tokens.Tokens()
@@ -124,11 +123,12 @@ class UsersAccount(object):
                     subject=mail_subject,
                     sender=os.getenv("ADMIN_EMAIL"),
                     recipients=[receipients_email],
-                    html=render_template(template_name_or_list="otp.html", **context)
+                    html=render_template(template_name_or_list=email_template, **context)
                 )
                 print("\n\t email_message: ", email_message)
                 server.send_mail.send(email_message)
                 return {
+                    "otp_code": otp_code,
                     "status": True,
                     "message": f"Registration email has been successfully sent."
                 }
