@@ -2,17 +2,20 @@ from datetime import datetime
 import json
 import logging
 from xml.dom import ValidationErr
+from bson import ObjectId, is_valid
 from flask_restful import Resource, request
 import os
 
 from src.utilities.authenticate import authenticate_requests
 from ..model import Tokens
 from ..serializers.auth_serializers import (
-    RegisterSerializer
+    RegisterSerializer,
+    UpdateCredentialsSerializer
 )
 from ..model.UsersAccount import (
     UsersAccount,
 ) 
+from src.utilities import logging_helper
 from ..model.UsersAccount import Users as DBUsers
 from src.utilities.models import UtilityModels, UserLogs
 
@@ -22,7 +25,8 @@ BASE_API = f"{BASE_API}/users"
 class UsersAccountController(Resource):
     logging.basicConfig(level=logging.INFO)
     Users = UsersAccount()
-    AuthToken = Tokens.Tokens
+    AuthToken = Tokens.Tokens()
+    Logs = UserLogs
     def login(self, cleaned_request):
         try:
             print("\n\t Login: ", cleaned_request)
@@ -66,10 +70,10 @@ class UsersAccountController(Resource):
         OTPToken = Tokens.Tokens()
         all_users = self.Users.find()
         print("\n\t All users: ", all_users)
-        for user in all_users:
-            print("\n\t user: ", user, user["_id"])
-            del_stat = self.Users.find_by_id_and_delete(user['_id'])
-            print("\n\t del_stat: ", del_stat)
+        # for user in all_users:
+        #     print("\n\t user: ", user, user["_id"])
+        #     del_stat = self.Users.find_by_id_and_delete(user['_id'])
+        #     print("\n\t del_stat: ", del_stat)
         try:
             serializer = RegisterSerializer(**cleaned_request)
             if serializer.is_valid():
@@ -135,10 +139,8 @@ class UsersAccountController(Resource):
         try:
             all_users = self.Users.find()
             print("\n\t All users: ", all_users)
-            for user in all_users:
-                print("\n\t user: ", user)
-
-            print("\n\t verify_auth_token: ", cleaned_request)
+            # for user in all_users:
+            #     print("\n\t user: ", user)
             otp_code = cleaned_request['otp']
             otp_email = cleaned_request['email']
             print("\n\t otp_code: ", otp_code)
@@ -159,6 +161,10 @@ class UsersAccountController(Resource):
                         "status_code": 201,
                         "message": "Verification was successful"
                     }
+                    self.Logs.insert_one({
+                        "action": "Opened app",
+                        "users_id": users_details["_id"]
+                    })
                     print("\n\t Success: ", success_data)
                     return success_data
             raise ValidationErr(otp_exists["message"])
@@ -184,6 +190,9 @@ class UsersAccountController(Resource):
             authenticate_response = self.authenticate_user(cleaned_request=cleaned_request)
             print("\n\t authenticate_response: ", authenticate_response)
             return authenticate_response, authenticate_response['status_code']
+        elif "update-users-credentials" in url:
+            update_users_credentials = self.update_users_credentials(request_data=cleaned_request)
+            return update_users_credentials, update_users_credentials["status_code"]
         elif "update" in url:
             profile_update_response = self.update_users_details(request_data=cleaned_request)
             return profile_update_response, profile_update_response["status_code"]
@@ -193,13 +202,71 @@ class UsersAccountController(Resource):
         
 
     def verify_credentials_otp(self, request_data):
-        otp_code = request_data["otpCode"]
-        users_id = request_data["usersId"]
-        user = self.Users.find_one(id=users_id)
-        if user:
-            otp_exists = self.AAuthToken.verify_token(raw_token=otp_code, users_id=users_id)
+        try:
+            otp_code = request_data["otpCode"]
+            users_id = request_data["usersId"]
+            user = self.Users.find_one(id=users_id)
+            if user:
+                print("\n\t users_id: ", users_id)
+                print("\n\t otp_code: ", otp_code)
+                otp_exists = self.AuthToken.verify_token(raw_token=otp_code, users_id=ObjectId(users_id))
+                if otp_exists:
+                    print("\n\t otp_exists: ", otp_exists)
+                    # self.AuthToken.delete_token(token=otp_code)
+                    return {
+                        "message": "OTP verification was successful",
+                        "status_code": 200,
+                    }
+            raise ValidationErr()
+        except Exception as verify_credentials_otp_error:
+            logging_helper.logging_helper("info", verify_credentials_otp_error)
+            return {
+                "message": "Unable to verify OTP",
+                "status_code": 500,
+            }
 
-
+    def update_users_credentials(self, request_data):
+        try:
+            print("\n\t request_data", request_data)
+            new_email = request_data["input"]['email']
+            users_id = request_data["_id"]
+            users_password = request_data["input"]["password"]
+            serializer = UpdateCredentialsSerializer(
+                email=request_data['email'],
+                confirm_password=request_data["input"]['confirm_password'],
+                password=users_password
+            )
+            print("\n\t serializer ......", serializer)
+            if serializer.is_valid():
+                print("\n\t serializer is valid......",)
+                user = self.Users.find_one(users_id)
+                if user:
+                    new_password = self.AuthToken.hash_token(raw_token=users_password)
+                    self.Users.find_by_id_and_update(id=users_id, data={"password": new_password, "email": new_email})
+                    mail_status = self.Users.send_registration_email(
+                        receipients_email=new_email, 
+                        fullname=f"{user['firstname']} {user['lastname']}", 
+                        email_template="successful_credentials_change.html",
+                        mail_subject="Successful COC (Change of Credentials)"
+                    )
+                    if mail_status:
+                        self.AuthToken.delete_token(token=mail_status["otp_code"])
+                        self.Logs.insert_one({
+                            "action": "Successfully updated credentials",
+                            "users_id": users_id
+                        })
+                        return {
+                            "message": "Credentials update was successful. Please check your email.",
+                            "status_code": 200,
+                        }                      
+            print("\n\t serializer.errors()......", serializer.errors())
+            raise ValidationErr(serializer.errors())
+        except Exception as update_users_credentials_error:
+            logging_helper.logging_helper("error", update_users_credentials_error)
+            return {
+                "message": str(update_users_credentials_error),
+                "status_code": 500
+            }
 
 
     def get_profile_details(self, users_id):
@@ -260,14 +327,22 @@ class UsersAccountController(Resource):
 
     def get_user_logs(self, users_id):
         try:
-            users_log = UserLogs.find({"users_id": users_id})
+            users_log = UserLogs.find({"users_id": ObjectId(users_id)})
             if users_log:
+                required_details = []
+                count = 0
                 for log in users_log:
-                    print("\n\t log: ", log)
-            return {
-                "data": users_log,
-                "status_code": 200
-            }
+                    data = {
+                        "action": log["action"],
+                        "date_created": str(log["date_created"]),
+                        "index": count
+                    }
+                    count += 1
+                    required_details.append(data)
+                return {
+                    "data": required_details,
+                    "status_code": 200
+                }
         except Exception as log_exception:
             print("\n\t log_exception: ", log_exception)
             return {
@@ -288,6 +363,10 @@ class UsersAccountController(Resource):
                     "phone": request_data["phone"],
                 }
                 self.Users.find_by_id_and_update(id=users_id, data={**data_to_update})
+                self.Logs.insert_one({
+                    "action": "Successfully updated bio-details",
+                    "users_id": users_id
+                })
                 return {
                     "message": "Profile has been successfully updated.",
                     "status_code": 200,
@@ -365,5 +444,6 @@ auth_routes = [
     f"{BASE_API}/update-profile-details",
     f"{BASE_API}/logs/<users_id>",
     f"{BASE_API}/change-credentials/<users_id>",
-    f"{BASE_API}/users/verify-credentials-otp",
+    f"{BASE_API}/verify-credentials-otp",
+    f"{BASE_API}/update-users-credentials",
 ]

@@ -4,6 +4,7 @@ from ..model import (
 
 
 Users = UsersAccount.Users
+
 class RegisterSerializer(object):
     def __init__(self, firstname: str, lastname: str, email: str, phone: str, password: str, confirm_password: str) -> None:
         self.firstname = firstname
@@ -65,6 +66,80 @@ class RegisterSerializer(object):
             "status": True,
             "message": ""
         }
+        
+
+    def is_valid(self):
+        try:
+            validate_data_existence = self.validate_data_existence()
+            print("\n\t validate_data_existence: ", validate_data_existence)
+            if validate_data_existence['status']:
+                password_similarity = self.password_similarity()
+                if password_similarity['status']:
+                    return True
+            return False
+        except Exception as is_valid_error:
+            print("\n\t is_valid_error: ", is_valid_error)
+            return False
+
+
+    def errors(self):
+        try:
+            validate_data_existence = self.validate_data_existence()
+            error_message = validate_data_existence['message']
+            print("\n\t validate_data_existence: ", validate_data_existence)
+
+            if validate_data_existence['status']:
+                password_similarity = self.password_similarity()
+                error_message = password_similarity['message']
+                if password_similarity['status']:
+                    return ""
+            return error_message
+        except Exception as is_valid_error:
+            print("\n\t is_valid_error: ", is_valid_error)
+            return error_message
+
+
+
+class UpdateCredentialsSerializer(object):
+    def __init__(self, email: str, password: str, confirm_password: str) -> None:
+        self.email = email
+        self.password = password
+        self.confirm_password = confirm_password
+
+    def validate_data_existence(self, **kwargs):
+        try:
+            if "@" not in self.email:
+                return {
+                    "status": False,
+                    "message": "Unrecognised email format"
+                }
+            return {
+                "status": True,
+                "message": ""
+            }
+        except Exception as validator_error:
+            print("\n\t validator_error: ", validator_error)
+            return {
+                "status": False,
+                "message": validator_error
+            }
+
+    def password_similarity(self):
+        if len(self.password) < 6:
+            return {
+                "status": False,
+                "message": "Password length must be six characters long or more"
+            }
+        if self.password != self.confirm_password:
+            return {
+                "status": False,
+                "message": "Password discrepancy"
+            }
+        return {
+            "status": True,
+            "message": ""
+        }
+        
 
     def is_valid(self):
         try:
